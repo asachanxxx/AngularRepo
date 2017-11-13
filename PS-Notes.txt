@@ -1,4 +1,4 @@
-Services
+Services As we know it
 ========
 * the best prctice is to create application wide services in a "core" folde. this way there is a
 nice way to display the data
