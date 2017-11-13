@@ -1,0 +1,295 @@
+Component Layout
+================
+
+Selectors
+---------
+@Component({
+  
+selector: 'app-root',
+  
+templateUrl: './app.component.html',
+  
+styleUrls: ['./app.component.css']
+
+})
+
+if 'app-root' markup will be  <app-root></app-root>
+if '.app-root' markup will be  <div class="app-root"> </div>
+if  '[app-root]' markup will be  <div app-root> </div>
+
+******[] in css represent attribute
+
+**** to define any kind of array use [] and to define elements use {}
+	styles[]
+	styles[
+		h3{color:red;},
+		h4{color:red;},	
+	]
+
+interpolation
+=============
+
+to colleborate with class and the temlate we use interpolation
+
+export class AppComponent {
+  
+	title = 'app';
+  
+	jobtitle ="Software Engineer";
+
+}
+
+to show jobtitle to the template we use double curly brackets {{}}
+
+<header>
+  
+	<h1>All about Angular 4</h1>
+  
+	<h4>Title : {{jobtitle}}</h4>
+
+</header>
+
+then angular compiler kicks in and evaluate jobtitle variable and disply 
+
+private variables can also be display. so these template and class are tidly couple to each other
+
+String Concatanation
+--------------------
+
+ <h4> {{"Title :" +  jobtitle}}</h4>
+
+binding cannot contain assignment. so you cannot do this
+<h4> {{jobtitle = "CEO"}}</h4>
+
+how about string function calling
+<h4> {{"Title :" +  jobtitle.toLowerCase()}}</h4>
+this will work.
+
+can javascript global variables access with in template?
+no it can't it will give a type error
+EX: Math.Random
+
+Calling JS inside angular template
+----------------------------------
+if you call java script inside a script tag on the templates it will work
+	<script>
+  
+		window.alert(Math.random());
+
+	</script>
+
+call a function
+---------------
+*also we can call a function inside template like this
+	getContact(){
+    
+		return "+94 778151151";
+  
+	}
+
+	<h4> {{"Contact :" +  getContact()}}</h4>
+
+
+safe navigation operator
+------------------------
+lets say an object defines as this
+
+job:Object;
+
+and it's not assigne to anything else. and we call it like this
+
+	<h4> {{"Contact :" +  job.title}}</h4> // Error 
+	(Cannot read property 'title' of undefined)
+
+this will give an error . and to revolve this we use safe navigation (?.) this is call elwis
+	
+	<h4> {{"Contact :" +  job?.title}}</h4> // Error
+
+
+
+Property Binding
+================
+
+	<button disabled>Disabled</button>
+
+disabled is an attribute and cus we put it in here button will be disabled
+
+how about this
+
+	button disabled  = "false"> Disabled 2</button>
+
+setting this attribute to a value take no effect. attributes mean to be set without values
+value is self contained
+
+here how we go around this one. 
+
+	<button [disabled]  = "false"> Disabled 2</button>
+
+putting [] make attribute an property. so properties can be set to a value. so it will accept the value
+
+so we can use this techniqu to make attribute to an property and set it values using a class variables
+	
+	isDisabled = true;
+
+	<button [disabled]  = "isDisabled"> Disabled 3</button>
+
+this [] notation is somewhat fragile so we use this instead of that
+
+	 <button bind-disabled  = "isDisabled"> Disabled 4</button>
+
+
+
+Event Handling (binding)
+========================
+
+this refers to any event fired off by the DOM
+
+   <button id="mybtn1" (click) = "onCLickmybtn()">Click to see </button>
+
+by putting  click on () we make a function call
+
+send in the event data
+----------------------
+
+	 <button id="mybtn2" (click) = "onCLickmybtn2($event)">Click to pass events </button>
+      
+	 <p>{{"Address " + Address }}</p>
+
+so $event = all events owned by button. so it passed to the onCLickmybtn2 method 
+
+	onCLickmybtn2(event:any){
+    
+		alert("You clicked me!" + event.target.textContent);
+    
+		this.Address = "270/A Mullegama ,Homagama";
+
+  
+	}
+
+in class onCLickmybtn2 get that event object and gives an error of "event.target.textContent" witch is button's text
+"Click to pass events"
+
+on spot binding 
+---------------
+
+what about this?
+
+<div>
+      
+	<button id="mybtn3" on-click="Area = $event.target.textContent" >Colombo </button>
+      
+	<button id="mybtn3" on-click="Area = $event.target.textContent" >Negombo </button>
+      
+	<button id="mybtn3" on-click="Area = $event.target.textContent" >Kandy </button>
+      
+	<p>{{"Current City " + Area }}</p>
+</div>
+ 	
+
+on-click="Area = $event.target.textContent" will bind the button's text to the Area variable and show it 
+in beloiw interpolation
+
+[you can use on- on any kind of event to handle it directly]
+
+
+Classes , Attributes , Styles
+=============================
+
+you can set these on the fly
+
+you can add any css classes define in the files using this
+	
+*CSS RULE# 
+
+.special-h3{
+ 	    color: #E65100;
+	    border-bottom: 1px solid #5D4037; 
+ }
+	
+*Assign to variable 
+
+specialh3 = "special-h3"
+
+*Add to h3 tag
+
+<h3 [class]="specialh3">Classes , Attributes , Styles</h3>
+
+
+binding multiple class
+----------------------
+
+here we use [ngClass] special directive to achive this task.
+
+ <div [ngClass] = "alertstyles">
+      
+	<p>This area is styled using multiple style embeded!</p>
+  
+ </div>
+
+we have to make an array of boolean to apply this styles 
+
+	 alertstyles ={
+    
+		"alert" :true,
+    
+		"alert-success" :true
+  
+		}  
+
+
+Also we can make a variable style in one line 
+---------------------------------------------
+	
+	singleLine = "alert alert-danger";
+
+
+	<div [ngClass] = "singleLine">
+    
+		<p>This area is styled using multiple style embeded!</p>
+  
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
