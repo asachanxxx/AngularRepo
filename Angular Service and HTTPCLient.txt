@@ -1,0 +1,265 @@
+Component
+=========
+Interpolation
+-------------
+{{variable}} <--- this is interpolation
+
+
+
+Observabless
+============
+asynchronus
+Part of Rxjs
+return types of httpClient
+Can be use with other thing as well rather than httpclient
+Very Large api
+
+Observabless never directly returns a object. it only observing the given link
+once you subcribe to the Observabless then it will get the actual data
+
+subscrib function take 3 functions as parameters
+these 3 functions are call back function wich says what happen to that inquery done with the subscription
+
+1. data object(data=> console.log(data))
+2. error if error occured (err function (err=> console.log(err)))
+3. after completion (this function excute after both of above and it denoted as ()=> console.log("All done!") )
+
+Async Http REquest
+==================
+
+getAllReaders():Observable<Reader[]> {
+    return this.http.get<Reader[]>('/api/readers');
+}
+
+getAllReaders method returns an async type of Reader[] array.
+
+this.http.get<Reader[]> get method maps the incoming data to an Reader array
+then it taks the end point as parameter
+
+to use this 
+
+ this.dataService.getAllReaders()
+   .subscribe(
+     data=> this.allReaders = data,
+     err => console.log(err.message),
+     () => console.log("Task Completed")
+   )
+
+.subscribe has 3 functions. 
+1. if success the return data will passed to  this.allReaders array
+2. if an error hits it will console log
+3. when async task complete then it also console log.
+
+Consider this
+-------------
+
+ this.dataService.getAllReaders()
+   .subscribe(
+     data=> this.allReaders = data,
+     err => this.loggerService.log(err.message),
+     () => console.log("Task Completed")
+   )
+ this.loggerService.log("Done with dashboard initialisation")
+
+
+this code will log 2 things .witch is the first. most likly it 2nd one
+will hit first. why? above async task not yet completed. cus it's async 
+then 2nd one will hit and after all done 1st one will hit
+
+if an error occured the last completed function callback will not hit. 
+so a async call will 
+	1. end up either () => 
+	2. or Err => function
+Err=> will return HttpErrorResponse object in return
+
+
+Creating custome Error Component globally
+=========================================
+
+first thing 1st we must create a model to hold error object.
+it's like this 
+
+export class booktrackererror{
+   errorNumber:number;
+   message:string;
+   friendlyMessage:string; 
+}
+
+then we will create a error handling method on data service
+like so
+
+  private handleError(error:HttpErrorResponse):Observable<booktrackererror>{
+    let dataError = new booktrackererror();
+    dataError.errorNumber = 100;
+    dataError.message = error.message;
+    dataError.friendlyMessage = "An error occurred in the system";
+    return Observable.throw(dataError);
+  }
+
+when observable get an error it pass an HttpErrorResponse object. this method mean to capture that error message. 
+the return type of this method must be an observable as well cus our getAllReaders method need to pass this in case of an error and getAllReaders also passing an observable.
+
+dataError.errorNumber is custome number .
+
+to use this function
+
+ getAllReaders():Observable<Reader[]> {
+    return this.http.get<Reader[]>('/api/errors/500')
+    .catch(this.handleError);
+  }
+
+catch(this.handleError);
+when catch an error the curser pass that error to  handleError() method.
+now there is an exception
+
+(Type 'Observable<Reader[] | booktrackererror>' is not assignable to type 'Observable<Reader[]>'.)
+
+what it says that if all there is no error it pass Observable<Reader[]>
+if there is an error it pass Observable<booktrackererror> .
+so we declare only Observable<Reader[]> . this is why angular gives this error
+in order to fix this we have to return either Observable<Reader[]>  or Observable<booktrackererror>
+
+this can be done as follows 
+
+getAllReaders():Observable<Reader[] | booktrackererror> {
+
+* in this point there will be an error 
+
+[dashboard.component.ts (29,13): Type 'Reader[] | booktrackererror' is not assignable to type 'Reader[]'.]
+
+now you can understand this error cus observable getAllReaders returns 
+'Reader[] | booktrackererror'
+
+but dashboard subscriber accepts only Reader[]
+
+to fix this
+.subscribe(
+     (data:Reader[])=> this.allReaders = data,
+     (err:booktrackererror) => this.loggerService.log("ERR FUNC:_ "+ err.message),
+     () => console.log("Task Completed",this.allReaders)
+
+1. we mark data as a reader[] array
+2. we mark err as a booktrackererror 
+this will accept both incomming 2 promiss objects 
+
+so what if we want some method to be executed after an error occured?
+heres how you do it. we create a private method wich will accept a parameter of thype
+booktrackererror like this
+
+private ErrorDisply(tracker:booktrackererror){
+    this.loggerService.log("ERR FUNC:_ "+ tracker.friendlyMessage);
+    window.alert(tracker.friendlyMessage);
+}
+
+in here we console log the detail as well as we disply it to the user as an alert
+so we pass that method like this
+
+(err:booktrackererror) => this.ErrorDisply(err)
+
+this will do!!!!
+
+
+
+
+Promisses
+=========
+
+promisses is javascript base and diliver with the ES 2015 bundle as a part
+good one to make async call. 
+* genaral purpose solution for perfoming asyncronus works
+* results process with call back functions
+	will either be "Resolved" or "Rejected"
+
+
+ getAuthorRecomandation(readerID:number):Promise<string>{
+    return new Promise((resolve , reject) =>{
+        setTimeout(() => {
+          if(readerID >0){
+            resolve("Dr.Seuss");
+          }else{
+            reject("Invalid reader ID");
+          }
+        }, 2000);
+    });
+  }
+
+getAuthorRecomandation returns a promiss object type of string. 
+setTimeout simulates 2 sec dely if readerid>0 it will RESOLVE
+other wise it will REJECT
+
+to use this method
+
+ this.dataService.getAuthorRecomandation(1)
+    .then(
+      (author:string) => this.loggerService.log(author),
+      (err:string) => this.loggerService.log("Error Occurred: " + err)
+    )
+
+after .then 1st parameter is when resolve the promiss
+other one is when reject the promiss
+
+another way to handle the errors is as follows
+
+this.dataService.getAuthorRecomandation(1)
+    .then(
+      (author:string) => {
+        this.loggerService.log(author)
+        throw new Error('Problem in handler')
+      },
+      (err:string) => this.loggerService.log("Error Occurred: " + err)
+     )
+     .catch((error:Error) =>{
+        this.loggerService.log("Error:- " + error.message);
+        window.alert(error.stack);
+     }
+     )
+
+now in here we simulate a errorr on resolve handler by throwing an error object
+so catch statement will catch that error 
+
+
+
+async/wait
+===========
+
+
+
+
+
+Switch
+======
+  switch (req.responseType) {
+          case 'arraybuffer':
+            return map.call(res$, (res: HttpResponse<any>) => {
+              // Validate that the body is an ArrayBuffer.
+              if (res.body !== null && !(res.body instanceof ArrayBuffer)) {
+                throw new Error('Response is not an ArrayBuffer.');
+              }
+              return res.body;
+            });
+          case 'blob':
+            return map.call(res$, (res: HttpResponse<any>) => {
+              // Validate that the body is a Blob.
+              if (res.body !== null && !(res.body instanceof Blob)) {
+                throw new Error('Response is not a Blob.');
+              }
+              return res.body;
+            });
+          default:
+            // No validation needed for JSON responses, as they can be of any type.
+            return map.call(res$, (res: HttpResponse<any>) => res.body);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,5 @@
+Angular Commands As we know it
+==============================
+[][create a service without test classes]
+ng g service services/PlainLogger --spec false
+

@@ -1,0 +1,288 @@
+Services
+========
+* the best prctice is to create application wide services in a "core" folde. this way there is a
+nice way to display the data
+
+
+
+if you create a service call logger service as injectable , then it must be provide in the module to use whole project.
+	 providers: [ LoggerService ,  DataService],
+
+
+this is a nice way but if you want to use inheritance with the services
+then
+	 providers: [
+	    {provide:LoggerService ,useClass:PlainLoggerService }, 
+	    DataService],
+
+in here every time a call for LoggerService it will return a PlainLoggerService service instance. 
+in this call where ever LoggerService requested the PlainLoggerService instance is provided
+this technique is use when you want  multiple form of a class. for ex: if you want Spceific Logger
+rather than PlainLoggerService you can implemnent it in here.
+
+also if you want to hide all of that and give on spot initialisation of things you can use following
+
+
+	{provide:LoggerService ,useValue:{
+     	 	log:(message) => console.log("Message" , message),
+      		error:(error) => console.error("Error" , error) 
+     	} },  DataService
+
+in here we are make instance on spot of LoggerService  for use. this way is quicker
+
+
+
+Implementing Factoty Pattern To combine Logger and Data Service
+===============================================================
+
+import {DataService} from '../services/data.service'
+import {LoggerService} from '../services/logger.service'
+
+
+export function DataServiceFactoty(logger:LoggerService) {
+    
+    let dataservice:DataService = new DataService(logger);
+    logger.log("Created a factory with dataservice and logger");
+
+    return dataservice;
+}
+
+this is a function and it's a factory. it combines the data service and logging service
+
+
+Injection
+=========
+
+constructor(private loggerService: LoggerService)
+
+when you inject a class like this the instance of LoggerService class is passed to loggerService variable
+when used porivate key word you can use that loggerService variable thouout the class just like a regular
+class variable.
+
+this.loggerService.Log("Somethign");...
+
+or you can do this
+
+ private loggs:LoggerService;
+  constructor( logger:LoggerService) { 
+    logger.log("Data Program Initiated!");
+    this.loggs = logger;
+  }
+
+You create a private property and assign it to the passing injected value
+
+Export
+======
+export class LoggerService {
+
+when not using export key word you can use this class outside of the file. it's like public key word
+
+
+Date
+====
+
+is you ever wonder how to handle dates in the angular. use Date Interface to handle
+like this
+
+const timeString: String = new Date().toLocaleTimeString();
+
+new Date() will return current date time object . extention methods can break it down to what ever you want 
+
+
+Implement DataAccess service
+============================
+Consider following code 
+-----------------------------------------------------------------------------------------------------
+@Injectable()
+export class DataService {
+
+  constructor(private loggerService: LoggerService) { }
+
+  mostPopularBook: Book = allBooks[0];
+
+  setMostPopularBook(popularBook: Book): void {
+    this.mostPopularBook = popularBook;
+  }
+
+  getAllReaders(): Reader[] {
+    return allReaders;
+  }
+
+  getReaderById(id: number): Reader {
+    return allReaders.find(reader => reader.readerID === id);
+  }
+
+  getAllBooks(): Book[] {
+    return allBooks;
+  }
+
+  getBookById(id: number): Book {
+    return allBooks.find(book => book.bookID === id);
+  }  
+}
+
+
+please remember services are singleton and when shere them with component that same component have same value
+this is a important feature also you have to carefull 
+-----------------------------------------------------------------------------------------------------
+
+[mostPopularBook: Book = allBooks[0];]
+this line will create instance of book class and pass  allBooks arrays first element
+allBooks is a arra from a data file. it is implemented like this
+
+export const allBooks: Book[] = [
+    { bookID: 1, title: 'Goodnight Moon', author: 'Margaret Wise Brown', publicationYear: 1953 },
+    { bookID: 2, title: 'Green Eggs and Ham', author: 'Dr. Seuss', publicationYear: 1960 },
+    { bookID: 3, title: 'Where the Wild Things Are', author: 'Maurice Sendak', publicationYear: 1963 },
+    { bookID: 4, title: 'The Hobbit', author: 'J. R. R. Tolkien', publicationYear: 1937 },
+    { bookID: 5, title: 'Curious George', author: 'H. A. Rey', publicationYear: 1941 },
+    { bookID: 6, title: 'Alice\'s Adventures in Wonderland', author: 'Lewis Carroll', publicationYear: 1865 },
+];
+
+this is the simplest way to getting data.
+
+
+  getAllReaders(): Reader[] {
+    	return allReaders;
+  }
+
+this method will returns an array of reader 
+
+  getReaderById(id: number): Reader {
+    return allReaders.find(reader => reader.readerID === id);
+  }
+
+this will return single intance of a class
+[reader => reader.readerID === id] this is a lamda expression witch filters readrid using given id
+
+
+ngOnInit
+========
+
+this is a life cycle hook. and we can define initial thigs in here that will firstly need on the process
+
+  allBooks: Book[];  //= allBooks;
+  allReaders: Reader[]; //= allReaders;
+  mostPopularBook: Book;// = allBooks[0];
+
+ constructor(private logger:LoggerService,
+    private dataservice:DataService) { 
+    logger.log("Data Program Initiated!");
+  }
+
+  ngOnInit() {
+    //initializing the data
+    this.allBooks = this.dataservice.getAllBooks();
+    this.allReaders = this.dataservice.getAllReaders();
+    this.mostPopularBook = this.dataservice.mostPopularBook;
+  }
+
+in this example we initialize the variable globally on the top and then initialize them inside the
+ngOnInit assigning the them the data comming from dataservice that injected in
+
+
+
+Dependancy Injection
+====================
+
+Provider Tokens
+---------------
+ providers: [
+    LoggerService,DataService
+  ],
+
+pls node that the LoggerService and  DataService are the tokens
+
+-----------
+constructor(private route: ActivatedRoute,
+        private dataservice:DataService) { }
+------------
+
+also ActivatedRoute and DataService are the tokens injected in to ctor
+
+---------------------
+{provide:LoggerService ,useClass:PlainLoggerService }, 
+---------------------
+
+provide keyword specify the token and  useClass specify the implementation (recipe) mentioned
+in the token
+	* if provider and the class are same then we can use just one name for short hand
+		[{provide:LoggerService ,useClass:LoggerService } -  we can use just LoggerService]
+
+
+heirachichal injection
+======================
+ providers: [
+    LoggerService,DataService
+  ],
+
+this was injected in to the root injector
+root injector is the providers array of the app.component
+if you inject it it will use as the base of the all followin components on the heirachi down .
+so any change to one thing effect to another all components in the heirachi.
+
+to avoid that as needed we can inject the dependancy direct in to the component.
+like so
+
+@Component({
+  selector: 'app-edit-book',
+  templateUrl: './edit-book.component.html',
+  styles: [],
+  providers: [DataService]
+})
+
+
+in this case the component wins. and the injection of the component is taking over.
+so it operate as a singlton for this component only.
+
+
+Globalizing the services
+========================
+
+let's say some services you need created for whole application. theire scope spreed througt the entire project
+so let's see how we can achive this things
+
+* create a folder name core or some global meang name
+* add a NgMoudle file to it to make it as a module
+* move all the services to that folder witch you want them to be global
+* import them in the module and provide them in core modules.
+* import the core module in main module.ts's import section 
+
+you done!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
