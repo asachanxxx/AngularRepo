@@ -250,7 +250,14 @@ Switch
             return map.call(res$, (res: HttpResponse<any>) => res.body);
         }
 
+observable is cold witch mean data not been there.
+and we have to tell to go and get data
 
+
+using SASS
+=========
+
+ ng new command with the  --style scss flag when generating the app
 
 
 
