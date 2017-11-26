@@ -1,0 +1,374 @@
+1. Block Scope
+===========
+In Java and C++ there is the concept of block scope, a block is any code that is wrapped in { and }, like so:
+
+Copy{
+    // This is a block
+}
+
+// This is not part a block
+
+what???
+
+this is working trust me
+
+{
+  var a = "block";
+}
+console.log(a);
+
+this is call global scope 
+other one is function scope
+
+function hello() {
+    var a = "function";
+}
+hello();
+console.log(a);
+
+ES5 only have this 2
+
+
+to work around this ES6 now have Let key word
+
+function hello() {
+    var a = "function";
+    for (var i = 0; i < 5; i++) {
+        let a = "block";
+    }
+    console.log(a);
+}
+hello();
+
+he a declared in the for loop body only exists between the { and }, and the code snippet above prints out function as expected
+
+Using let in for loops
+======================
+var funcs = [];
+for (var i = 0; i < 5; i += 1) {
+    var y = i;
+    funcs.push(function () {
+        console.log(y);
+    })
+}
+funcs.forEach(function (func) {
+    func()
+});
+
+The reason for this is that the variable y is not block level, it doesn’t only exist inside its enclosing {} In fact it’s a global variable and by the time any of the functions are called it’s already been set to 5.
+
+
+so replace this with let will make y as a block scope variable
+
+
+
+
+
+2. const variable
+=================
+
+We can use const to declare a variable but unlike let and var it must be immediately initialised, with a value that can’t be changed afterwards.
+
+const foo; // SyntaxError: Missing initializer in const declaration
+
+
+Both let and const create variables that are block-scoped – they only exist within the innermost block that surrounds them.
+
+function func() {
+    if (true) {
+        const tmp = 123;
+    }
+    console.log(tmp); // Uncaught ReferenceError: tmp is not defined
+}
+func();
+
+
+Variables created by const however are immutable, they don’t change over time, specifically the the const variable can’t point to another thing later on.
+
+const foo = 'abc';
+foo = 'def'; // TypeError: Assignment to constant variable
+
+
+But we can however mutate, make changes to, the object foo points to, like so:
+
+const foo = {};
+foo['prop'] = "Moo"; // This works!
+console.log(foo);
+
+
+When we freeze an object we can’t change it, we can’t add properties or change the values of properties, like so:
+
+const foo = Object.freeze({});
+foo.prop = 123;
+console.log(foo.prop) // undefined
+
+
+
+
+Strings
+=======
+
+With ES5 and ES6 we can specify a string with either the ' or " characters.
+
+let single = "hello world";
+
+
+But in ES5 if we wanted to make that string span multiple lines it quickly becomes a pain.
+
+let single = 'hello ' +
+    'world ' +
+    'my ' +
+    'name ' +
+    'is ' +
+    'asim';
+!!!this will be one line 
+to achive this in ES5 we have to use '\n' scape charactor
+
+but ES6 we have ``  tidle . it format the string as it is
+
+
+Variable Substitution
+---------------------
+
+let name = "asim";
+
+let multi = `
+hello
+world
+my
+name
+is
+${name}
+`;
+console.log(multi);
+
+this is call variable substitution at all
+
+
+Fat Arrow Function
+==================
+JavaScript has first class functions.
+
+This means that in JavaScript functions can be themselves be passed around like any other value, even as arguments to other functions.
+
+setTimeout(function() {
+	console.log("setTimeout called!");
+}, 1000);
+
+ES6 has introduced a slightly different syntax to define anonymous functions called the fat arrow syntax, with it we can re-write the above as:
+
+CopysetTimeout(() => {
+    console.log("setTimeout called!")
+}, 1000);
+
+()=> this is the fat arrow
+
+
+With arguments
+==============
+
+What if we wanted to pass an argument to the function?
+
+We can re-write the below normal function to one that uses the fat arrow syntax:
+
+let add = function(a,b) {
+	return a + b;
+};
+Can now be written as:
+
+let add = (a,b) => a + b;
+
+
+This
+----
+Lets imagine we have an object with a function called sayLater, like so:
+
+Copylet obj = {
+	name: "asim",
+	sayLater: function() {
+		console.log(`${this.name}`);
+	}
+};
+obj.sayLater();
+
+
+
+
+Destructing 
+===========
+
+Let’s imagine we have an object like so:
+
+const obj = {first: 'Asim', last: 'Hussain', age: 39 };
+We want to extract the first and last properties into local variables, prior to ES6 we would have to write something like this:
+
+const f = obj.first;
+const l = obj.last;
+console.log(f); // Asim
+console.log(l); // Hussain
+With destructing we can do so in one line, like so:
+
+const {first: f, last: l} = obj;
+console.log(f); // Asim
+console.log(l); // Hussain
+
+
+Array destructuring 
+-------------------
+
+Array destructuring works in a similar way except it extracts based of the index in the array, like so:
+
+const arr = ['a', 'b'];
+const [x, y] = arr;
+console.log(x); // a
+
+
+
+console.log(y); // b
+
+
+
+For & ForEach
+=============
+
+We have a couple of ways of looping through Arrays in ES5 javascript.
+
+For one we have the classic for loop, like so:
+
+let array = [1,2,3];
+for (let i = 0; i < array.length; i++) {
+  console.log(array[i]);
+}
+
+also we can for each
+
+ arrnum.forEach((Value) =>{
+      console.log("For each " , Value);
+      
+  })
+
+for-in loop
+===========
+
+The for-in loop is designed for iterating over an objects properties, like so:
+
+var obj = {a:1,b:2};
+for (let prop in obj) {
+    console.log(prop);
+}
+
+for(let x in arrnum){
+      console.log(typeof(x));
+}
+
+The index variable is a string and not a number, using for-in with arrays converts the index to a string.
+
+EX:
+
+let base = {a:1,b:2};
+let obj = Object.create(base);
+obj[c] = 3;
+for (prop in obj) console.log(prop)
+
+this will iterate over the property names rather than values
+
+
+For-of loop
+-----------
+
+Rather than change the way the for-in loops work in ES6 and in the process create a breaking change, instead in ES6 we have a new syntax called for-of.
+
+let array = [10,20,30];
+for (var value of array) {
+  console.log(value);
+}
+
+
+This is the most concise way of looping through array elements.
+
+It avoids all the pitfalls of for–in.
+
+It works with break, continue, and return
+
+
+Map
+---
+
+
+Map is a new data structure introduced in ES6 which lets you map keys to values without the drawbacks of using Objects.
+
+Creating, getting and setting
+
+We create a map using the new keyword, like so
+
+let map = new Map();
+
+let map = new Map();
+  map.set("val1", "Asanga chandrakumara");
+  map.set("val2", "270/A Mullegama ,Homagama");
+  map.set("val3", "Software Engineer");
+  map.set("val4", "Scinter Technologies");
+    let concatstr ="";
+  map.forEach((val)=>{
+       // console.log(val);
+        concatstr += ` ${val}\n`;
+        
+  });
+
+
+We can extract a value by using the get method:
+
+map.get("A");
+// 1
+We can check to see if a key is present using the has method:
+
+map.has("A");
+// true
+We can delete entries using the delete method:
+
+map.delete("A");
+// true
+
+iterating over value and key
+
+The keys method returns the keys in the map as an array which we can loop over using for-of like so:
+
+for (let key of map.keys()) {
+    console.log(key);
+}
+
+for (let value of map.values()) {
+    console.log(value);
+}
+
+returning key value paire 
+
+for (let entry of map.entries()) {
+    console.log(entry[0], entry[1]);
+}
+
+
+Set
+---
+
+Sets are a bit like maps but they only store keys not key-value pairs.
+
+They are common in other programming languages but are a new addition to JavaScript in ES6.
+
+Creating, getting and setting
+
+We create a Set using the new keyword, like so
+
+let set = new Set();
+
+let set = new Set();
+set.add('APPLE');
+set.add('ORANGE');
+set.add('MANGO');
+
+
+let set = new Set(['APPLE', 'ORANGE', 'MANGO']);
+
+
+set.clear();
+set.sized

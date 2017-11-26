@@ -250,8 +250,24 @@ Also we can make a variable style in one line
 	</div>
 
 
+FORMS
+=====
+=====
 
+Template Drivven Forms
+======================
 
+ <form #formval = "ngForm" (ngSubmit)="onSubmit(formval)" >
+
+what this does is first 
+"ngForm" has entire form represent. so we take it to variable "formval"
+and when pass the value to (ngSubmit) witch will fire when form submit.
+
+but we not done yet. if we log the formval it will show nothing. that cus 
+ngForm yet don't know what ot's element . so we tell that each input is it's own by 
+tagging them  "Name" and "ngModel"
+
+name="at-name" ngModel
 
 
 
